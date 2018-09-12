@@ -19,6 +19,7 @@ import com.facebook.presto.sql.planner.iterative.IterativeOptimizer;
 import com.facebook.presto.sql.planner.iterative.Lookup;
 import com.facebook.presto.sql.planner.plan.PlanNode;
 
+//统计信息的计算器接口，其实现类有ComposableStatsCalculator
 public interface StatsCalculator
 {
     /**

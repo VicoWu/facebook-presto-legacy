@@ -24,6 +24,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * 实现类有GlueHiveMetastore和FileHiveMetastore
+ */
 public interface ExtendedHiveMetastore
 {
     Optional<Database> getDatabase(String databaseName);

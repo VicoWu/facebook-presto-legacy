@@ -59,6 +59,7 @@ public class FeaturesConfig
     @VisibleForTesting
     static final String SPILLER_SPILL_PATH = "experimental.spiller-spill-path";
 
+    //基于CBO的资源消耗，有三个部分，cpu，memory和network
     private double cpuCostWeight = 75;
     private double memoryCostWeight = 10;
     private double networkCostWeight = 15;

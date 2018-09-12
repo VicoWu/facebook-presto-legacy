@@ -98,6 +98,9 @@ import static org.apache.hadoop.hive.metastore.TableType.EXTERNAL_TABLE;
 import static org.apache.hadoop.hive.metastore.TableType.MANAGED_TABLE;
 import static org.apache.hadoop.hive.metastore.TableType.VIRTUAL_VIEW;
 
+/**
+ *  用文件而不是metastore server来作为metastore的保存工具
+ */
 @ThreadSafe
 public class FileHiveMetastore
         implements ExtendedHiveMetastore

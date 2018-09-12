@@ -61,6 +61,15 @@ public class ComposableStatsCalculator
         return rulesByRootType.get(node.getClass()).stream();
     }
 
+    /**
+     * 计算这个节点的统计信息
+     * @param node The node to compute stats for.
+     * @param sourceStats The stats provider for any child nodes' stats, if needed to compute stats for the {@code node}
+     * @param lookup Lookup to be used when resolving source nodes, allowing stats calculation to work within {@link IterativeOptimizer}
+     * @param session
+     * @param types
+     * @return
+     */
     @Override
     public PlanNodeStatsEstimate calculateStats(PlanNode node, StatsProvider sourceStats, Lookup lookup, Session session, TypeProvider types)
     {

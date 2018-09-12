@@ -85,6 +85,9 @@ import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 
+/**
+ * ReorderJoin是作用在JoinNode上的一个rule，用来对这个JoinNode涉及到的左右两侧的item进行重排序
+ */
 public class ReorderJoins
         implements Rule<JoinNode>
 {
@@ -99,6 +102,7 @@ public class ReorderJoins
 
     private final CostComparator costComparator;
 
+    //在PlanOptimizers中 被构造
     public ReorderJoins(CostComparator costComparator)
     {
         this.costComparator = requireNonNull(costComparator, "costComparator is null");
@@ -116,6 +120,7 @@ public class ReorderJoins
         return getJoinReorderingStrategy(session) == AUTOMATIC;
     }
 
+    //执行这个规则
     @Override
     public Result apply(JoinNode joinNode, Captures captures, Context context)
     {
@@ -124,6 +129,7 @@ public class ReorderJoins
                 costComparator,
                 multiJoinNode.getFilter(),
                 context);
+        //选择join顺序
         JoinEnumerationResult result = joinEnumerator.chooseJoinOrder(multiJoinNode.getSources(), multiJoinNode.getOutputSymbols());
         if (!result.getPlanNode().isPresent()) {
             return Result.empty();
@@ -152,6 +158,7 @@ public class ReorderJoins
             this.context = requireNonNull(context);
             this.session = requireNonNull(context.getSession(), "session is null");
             this.costProvider = requireNonNull(context.getCostProvider(), "costProvider is null");
+            //从session中提取这个query session的xian
             this.resultComparator = costComparator.forSession(session).onResultOf(result -> result.cost);
             this.idAllocator = requireNonNull(context.getIdAllocator(), "idAllocator is null");
             this.allFilter = requireNonNull(filter, "filter is null");
@@ -164,29 +171,30 @@ public class ReorderJoins
             context.checkTimeoutNotExhausted();
 
             Set<PlanNode> multiJoinKey = ImmutableSet.copyOf(sources);
-            JoinEnumerationResult bestResult = memo.get(multiJoinKey);
+            JoinEnumerationResult bestResult = memo.get(multiJoinKey); //先判断这个join的结果是否已经存在了
             if (bestResult == null) {
                 checkState(sources.size() > 1, "sources size is less than or equal to one");
                 ImmutableList.Builder<JoinEnumerationResult> resultBuilder = ImmutableList.builder();
+                //为数据量为sources.size()的join节点生成不同的分区，分区结果可以参考TestJoinEnumerator.testGeneratePartitions()
                 Set<Set<Integer>> partitions = generatePartitions(sources.size());
-                for (Set<Integer> partition : partitions) {
+                for (Set<Integer> partition : partitions) { // 遍历每一个分区
                     JoinEnumerationResult result = createJoinAccordingToPartitioning(sources, outputSymbols, partition);
                     if (result.equals(UNKNOWN_COST_RESULT)) {
-                        memo.put(multiJoinKey, result);
+                        memo.put(multiJoinKey, result); //记录这个join的结果，防止下次进行join的时候重复计算
                         return result;
                     }
-                    if (!result.equals(INFINITE_COST_RESULT)) {
+                    if (!result.equals(INFINITE_COST_RESULT)) { //如果是一个正常的结果，那么就保存在这个resultBuilder中，resultBuilder中存放了迭代过程中所有的结果，稍后会对其进行排序
                         resultBuilder.add(result);
                     }
                 }
 
-                List<JoinEnumerationResult> results = resultBuilder.build();
+                List<JoinEnumerationResult> results = resultBuilder.build(); //完成所有的partition的估计
                 if (results.isEmpty()) {
                     memo.put(multiJoinKey, INFINITE_COST_RESULT);
                     return INFINITE_COST_RESULT;
                 }
 
-                bestResult = resultComparator.min(results);
+                bestResult = resultComparator.min(results);//对结果进行排序
                 memo.put(multiJoinKey, bestResult);
             }
 
@@ -388,7 +396,7 @@ public class ReorderJoins
 
         private JoinEnumerationResult createJoinEnumerationResult(PlanNode planNode)
         {
-            return JoinEnumerationResult.createJoinEnumerationResult(Optional.of(planNode), costProvider.getCumulativeCost(planNode));
+            return JoinEnumerationResult.createJoinEnumerationResult(Optional.of(planNode), costProvider.getCumulativeCost(planNode)); //计算这个PlanNode的cost值
         }
     }
 
@@ -541,6 +549,7 @@ public class ReorderJoins
         }
     }
 
+    //JoinEnumerationResult保存了一次join枚举的结果，尤其是这个join的cost，在chooseJoinOrder方法中，会在所有的Enumeration中高选择cost最小的结果
     @VisibleForTesting
     static class JoinEnumerationResult
     {

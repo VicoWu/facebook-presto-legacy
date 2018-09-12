@@ -173,6 +173,7 @@ public class RuleAssert
         Match<T> match = matcher.match(rule.getPattern(), planNode);
 
         Rule.Result result;
+        //如果没有打开这个rule，比如，
         if (!rule.isEnabled(context.getSession()) || match.isEmpty()) {
             result = Rule.Result.empty();
         }

@@ -168,6 +168,7 @@ public class PlanOptimizers
         optimizerStats.unexport(exporter);
     }
 
+    //构造所有的optimizer
     public PlanOptimizers(
             Metadata metadata,
             SqlParser sqlParser,
@@ -399,7 +400,7 @@ public class PlanOptimizers
                         ruleStats,
                         statsCalculator,
                         estimatedExchangesCostCalculator,
-                        ImmutableSet.of(new ReorderJoins(costComparator))));
+                        ImmutableSet.of(new ReorderJoins(costComparator)))); //构造ReorderJoins优化器
 
         builder.add(new OptimizeMixedDistinctAggregations(metadata));
         builder.add(new IterativeOptimizer(

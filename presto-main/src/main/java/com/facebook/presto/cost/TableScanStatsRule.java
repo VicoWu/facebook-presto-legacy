@@ -63,6 +63,8 @@ public class TableScanStatsRule
         // TODO Construct predicate like AddExchanges's LayoutConstraintEvaluator
         Constraint<ColumnHandle> constraint = new Constraint<>(node.getCurrentConstraint());
 
+        //获取hive的元数据统计信息，这些统计信息用来进行cost based optimization
+        //目前只有
         TableStatistics tableStatistics = metadata.getTableStatistics(session, node.getTable(), constraint);
         Map<Symbol, SymbolStatsEstimate> outputSymbolStats = new HashMap<>();
 

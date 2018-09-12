@@ -39,7 +39,7 @@ public class StatsCalculatorModule
 
         ImmutableList.Builder<ComposableStatsCalculator.Rule<?>> rules = ImmutableList.builder();
         rules.add(new OutputStatsRule());
-        rules.add(new TableScanStatsRule(metadata, normalizer));
+        rules.add(new TableScanStatsRule(metadata, normalizer)); //这个rule提供了统计信息，最终会调用Hive Connector的统计信息统计
         rules.add(new SimpleFilterProjectSemiJoinStatsRule(normalizer, filterStatsCalculator)); // this must be before FilterStatsRule
         rules.add(new FilterStatsRule(filterStatsCalculator));
         rules.add(new ValuesStatsRule(metadata));

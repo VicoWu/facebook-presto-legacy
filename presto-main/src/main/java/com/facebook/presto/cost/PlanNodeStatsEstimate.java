@@ -34,6 +34,9 @@ import static java.lang.Double.NaN;
 import static java.lang.Double.isNaN;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * 一个PlanNode的统计信息的估计
+ */
 public class PlanNodeStatsEstimate
 {
     private static final double DEFAULT_DATA_SIZE_PER_COLUMN = 50;

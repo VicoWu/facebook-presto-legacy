@@ -33,6 +33,7 @@ public interface Rule<T>
      */
     Pattern<T> getPattern();
 
+    //这个Rule是否打开
     default boolean isEnabled(Session session)
     {
         return true;

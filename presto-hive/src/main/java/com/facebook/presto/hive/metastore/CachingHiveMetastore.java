@@ -295,6 +295,7 @@ public class CachingHiveMetastore
 
     private PartitionStatistics loadPartitionColumnStatistics(HivePartitionName partition)
     {
+        //这里的delegate的实现是GlueHiveMetastore或者FileHiveMetastore
         Map<String, PartitionStatistics> partitionStatistics = delegate.getPartitionStatistics(
                 partition.getHiveTableName().getDatabaseName(),
                 partition.getHiveTableName().getTableName(),

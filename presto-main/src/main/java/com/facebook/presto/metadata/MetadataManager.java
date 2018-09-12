@@ -397,7 +397,7 @@ public class MetadataManager
     public TableStatistics getTableStatistics(Session session, TableHandle tableHandle, Constraint<ColumnHandle> constraint)
     {
         ConnectorId connectorId = tableHandle.getConnectorId();
-        ConnectorMetadata metadata = getMetadata(session, connectorId);
+        ConnectorMetadata metadata = getMetadata(session, connectorId);//不同的connector都实现了ConnectorMetadata，比如HiveMetadata
         return metadata.getTableStatistics(session.toConnectorSession(connectorId), tableHandle.getConnectorHandle(), constraint);
     }
 

@@ -43,6 +43,9 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 
+/**
+ * 统一的元数据信息接口，这里的实现类是MetadataManager，在MetadataManager中封装了不同的connector对具体的ConnectorMetadata接口的实现
+ */
 public interface Metadata
 {
     void verifyComparableOrderableContract();
