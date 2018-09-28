@@ -37,6 +37,7 @@ import com.facebook.presto.sql.tree.ExplainType.Type;
 import com.facebook.presto.sql.tree.Expression;
 import com.facebook.presto.sql.tree.Statement;
 import com.google.common.collect.ImmutableMap;
+import io.airlift.log.Logger;
 
 import javax.inject.Inject;
 
@@ -63,6 +64,7 @@ public class QueryExplainer
     private final NodeSchedulerConfig nodeSchedulerConfig;
     private final Map<Class<? extends Statement>, DataDefinitionTask<?>> dataDefinitionTask;
 
+    private static final Logger log = Logger.get(QueryExplainer.class);
     @Inject
     public QueryExplainer(
             PlanOptimizers planOptimizers,
@@ -132,6 +134,12 @@ public class QueryExplainer
 
         switch (planType) {
             case LOGICAL:
+                int totalOpt = planOptimizers.size();
+                for (int i = 0; i < totalOpt; i++) {
+                    log.info("plan with optimizer limit " + i);
+                    Plan plan = getLogicalPlanWithNum(session, statement, parameters, totalOpt);
+                    log.info("plan with optimizer to " + i + " is : " + PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes(), metadata.getFunctionRegistry(), statsCalculator, costCalculator, session, 0, false));
+                }
                 Plan plan = getLogicalPlan(session, statement, parameters);
                 return PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes(), metadata.getFunctionRegistry(), statsCalculator, costCalculator, session, 0, false);
             case DISTRIBUTED:
@@ -196,9 +204,23 @@ public class QueryExplainer
         return logicalPlanner.plan(analysis);
     }
 
+    public Plan getLogicalPlanWithNum(Session session, Statement statement, List<Expression> parameters, int number)
+    {
+        // analyze statement
+        Analysis analysis = analyze(session, statement, parameters);
+
+        PlanNodeIdAllocator idAllocator = new PlanNodeIdAllocator();
+
+        // plan statement
+        LogicalPlanner logicalPlanner = new LogicalPlanner(session, planOptimizers, idAllocator, metadata, sqlParser);
+        return logicalPlanner.planWithItegrateNumber(analysis, LogicalPlanner.Stage.OPTIMIZED_AND_VALIDATED, number);
+    }
+
     private SubPlan getDistributedPlan(Session session, Statement statement, List<Expression> parameters)
     {
+        log.info("Starting to create logic plan");
         Plan plan = getLogicalPlan(session, statement, parameters);
+        log.info("start to create distributed plan");
         return planFragmenter.createSubPlans(session, metadata, nodePartitioningManager, plan, false);
     }
 }

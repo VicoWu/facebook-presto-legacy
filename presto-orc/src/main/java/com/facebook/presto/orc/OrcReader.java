@@ -101,14 +101,6 @@ public class OrcReader
 
         this.writeValidation = requireNonNull(writeValidation, "writeValidation is null");
 
-        //
-        // Read the file tail:
-        //
-        // variable: Footer
-        // variable: Metadata
-        // variable: PostScript - contains length of footer and metadata
-        // 1 byte: postScriptSize
-
         // figure out the size of the file using the option or filesystem
         long size = orcDataSource.getSize();
         if (size <= MAGIC.length()) {

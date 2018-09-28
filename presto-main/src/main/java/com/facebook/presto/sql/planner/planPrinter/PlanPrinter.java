@@ -113,6 +113,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import io.airlift.log.Logger;
 import io.airlift.slice.Slice;
 
 import java.util.ArrayList;
@@ -154,6 +155,7 @@ public class PlanPrinter
     private final Optional<Map<PlanNodeId, PlanNodeStats>> stats;
     private final boolean verbose;
 
+    private static final Logger log = Logger.get(PlanPrinter.class);
     private PlanPrinter(
             PlanNode plan,
             TypeProvider types,
@@ -934,6 +936,8 @@ public class PlanPrinter
 
             format = operatorName + format;
             print(indent, format, arguments);
+
+            log.info("Start to print visitScanFilterAndProjectInfo information!");
             printPlanNodesStatsAndCost(indent + 2,
                     Stream.of(scanNode, filterNode, projectNode)
                             .filter(Optional::isPresent)
@@ -1397,8 +1401,10 @@ public class PlanPrinter
 
         private String formatPlanNodeStatsAndCost(PlanNode node)
         {
+            log.info("Start to format stats and cost information.statsProvider impelments is " + statsProvider.getClass().getName() + ",costProvider is " + costProvider.getClass().getName());
             PlanNodeStatsEstimate stats = statsProvider.getStats(node);
             PlanNodeCostEstimate cost = costProvider.getCumulativeCost(node);
+            log.info("Node info:");
             return String.format("{rows: %s (%s), cpu: %s, memory: %s, network: %s}",
                     formatAsLong(stats.getOutputRowCount()),
                     formatEstimateAsDataSize(stats.getOutputSizeInBytes(node.getOutputSymbols(), types)),

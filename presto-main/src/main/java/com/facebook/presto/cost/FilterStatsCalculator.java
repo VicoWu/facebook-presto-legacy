@@ -40,6 +40,7 @@ import com.facebook.presto.sql.tree.NodeRef;
 import com.facebook.presto.sql.tree.NotExpression;
 import com.facebook.presto.sql.tree.SymbolReference;
 import com.google.common.collect.ImmutableList;
+import io.airlift.log.Logger;
 
 import javax.annotation.Nullable;
 
@@ -78,6 +79,8 @@ public class FilterStatsCalculator
     private final ScalarStatsCalculator scalarStatsCalculator;
     private final StatsNormalizer normalizer;
     private final LiteralEncoder literalEncoder;
+
+    private static final Logger log = Logger.get(FilterStatsCalculator.class);
 
     public FilterStatsCalculator(Metadata metadata, ScalarStatsCalculator scalarStatsCalculator, StatsNormalizer normalizer)
     {
@@ -337,6 +340,7 @@ public class FilterStatsCalculator
         @Override
         protected Optional<PlanNodeStatsEstimate> visitComparisonExpression(ComparisonExpression node, Void context)
         {
+            log.info("Visiting in predicate!");
             ComparisonExpression.Operator operator = node.getOperator();
             Expression left = node.getLeft();
             Expression right = node.getRight();

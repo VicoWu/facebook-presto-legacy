@@ -60,6 +60,7 @@ import com.facebook.presto.sql.tree.Query;
 import com.facebook.presto.sql.tree.Statement;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import io.airlift.log.Logger;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
@@ -102,6 +103,7 @@ public class LogicalPlanner
     private final SqlParser sqlParser;
     private final StatisticsAggregationPlanner statisticsAggregationPlanner;
 
+    private static final Logger log = Logger.get(LogicalPlanner.class);
     public LogicalPlanner(Session session,
             List<PlanOptimizer> planOptimizers,
             PlanNodeIdAllocator idAllocator,
@@ -141,14 +143,46 @@ public class LogicalPlanner
 
     public Plan plan(Analysis analysis, Stage stage)
     {
+        log.info("start to plan Statement " + analysis.getStatement().toString());
         PlanNode root = planStatement(analysis, analysis.getStatement());
-
+        log.info("finished plan Statement " + analysis.getStatement().toString());
         planSanityChecker.validateIntermediatePlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
 
         if (stage.ordinal() >= Stage.OPTIMIZED.ordinal()) {
             for (PlanOptimizer optimizer : planOptimizers) {
+                log.info("applying optimizer " + optimizer.getClass().getName());
                 root = optimizer.optimize(root, session, symbolAllocator.getTypes(), symbolAllocator, idAllocator);
                 requireNonNull(root, format("%s returned a null plan", optimizer.getClass().getName()));
+            }
+        }
+
+        if (stage.ordinal() >= Stage.OPTIMIZED_AND_VALIDATED.ordinal()) {
+            // make sure we produce a valid plan after optimizations run. This is mainly to catch programming errors
+            planSanityChecker.validateFinalPlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
+        }
+
+        return new Plan(root, symbolAllocator.getTypes());
+    }
+
+    public Plan planWithItegrateNumber(Analysis analysis, Stage stage, int number)
+    {
+        log.info("start to plan Statement " + analysis.getStatement().toString());
+        PlanNode root = planStatement(analysis, analysis.getStatement());
+        log.info("finished plan Statement " + analysis.getStatement().toString());
+        planSanityChecker.validateIntermediatePlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
+
+        int i = 0;
+        for (PlanOptimizer optimizer : planOptimizers) {
+            log.info("Optimizer " + i + " is " + optimizer.getClass());
+        }
+        i = 0;
+        if (stage.ordinal() >= Stage.OPTIMIZED.ordinal()) {
+            for (PlanOptimizer optimizer : planOptimizers) {
+                if (i++ <= number) {
+                    log.info("applying optimizer " + optimizer.getClass().getName());
+                    root = optimizer.optimize(root, session, symbolAllocator.getTypes(), symbolAllocator, idAllocator);
+                    requireNonNull(root, format("%s returned a null plan", optimizer.getClass().getName()));
+                }
             }
         }
 

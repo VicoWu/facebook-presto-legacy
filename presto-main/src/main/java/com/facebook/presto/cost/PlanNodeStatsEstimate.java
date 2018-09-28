@@ -18,6 +18,7 @@ import com.facebook.presto.spi.type.Type;
 import com.facebook.presto.spi.type.VariableWidthType;
 import com.facebook.presto.sql.planner.Symbol;
 import com.facebook.presto.sql.planner.TypeProvider;
+import io.airlift.log.Logger;
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
 
@@ -42,6 +43,7 @@ public class PlanNodeStatsEstimate
     private final double outputRowCount;
     private final PMap<Symbol, SymbolStatsEstimate> symbolStatistics;
 
+    private static final Logger log = Logger.get(PlanNodeStatsEstimate.class);
     private PlanNodeStatsEstimate(double outputRowCount, PMap<Symbol, SymbolStatsEstimate> symbolStatistics)
     {
         checkArgument(isNaN(outputRowCount) || outputRowCount >= 0, "outputRowCount cannot be negative");
@@ -75,9 +77,14 @@ public class PlanNodeStatsEstimate
     {
         checkArgument(type != null, "type is null");
 
+        log.info("Trying to compute output size for symbol for type " + type.getDisplayName());
         double averageRowSize = symbolStatistics.getAverageRowSize();
+
         double nullsFraction = firstNonNaN(symbolStatistics.getNullsFraction(), 0d);
+
         double numberOfNonNullRows = outputRowCount * (1.0 - nullsFraction);
+
+        log.info("nullFractions is " + nullsFraction + ",outputRowCount is " + outputRowCount + ", numberOfNonNullRows" + numberOfNonNullRows);
 
         if (isNaN(averageRowSize)) {
             if (type instanceof FixedWidthType) {
