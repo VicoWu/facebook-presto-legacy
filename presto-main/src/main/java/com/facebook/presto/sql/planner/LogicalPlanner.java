@@ -171,7 +171,6 @@ public class LogicalPlanner
         log.info("[PlanDebug]finished plan Statement without optimizer " + analysis.getStatement().toString());
         planSanityChecker.validateIntermediatePlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
 
-
         if (stage.ordinal() >= Stage.OPTIMIZED_AND_VALIDATED.ordinal()) {
             // make sure we produce a valid plan after optimizations run. This is mainly to catch programming errors
             planSanityChecker.validateFinalPlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
@@ -179,7 +178,6 @@ public class LogicalPlanner
 
         return new Plan(root, symbolAllocator.getTypes());
     }
-
 
     public Plan planWithItegrateNumber(Analysis analysis, Stage stage, int number)
     {
