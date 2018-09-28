@@ -143,9 +143,9 @@ public class LogicalPlanner
 
     public Plan plan(Analysis analysis, Stage stage)
     {
-        log.info("start to plan Statement " + analysis.getStatement().toString());
+        log.info("[PlanDebug]start to plan Statement " + analysis.getStatement().toString());
         PlanNode root = planStatement(analysis, analysis.getStatement());
-        log.info("finished plan Statement " + analysis.getStatement().toString());
+        log.info("[PlanDebug]finished plan Statement " + analysis.getStatement().toString());
         planSanityChecker.validateIntermediatePlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
 
         if (stage.ordinal() >= Stage.OPTIMIZED.ordinal()) {
@@ -163,6 +163,23 @@ public class LogicalPlanner
 
         return new Plan(root, symbolAllocator.getTypes());
     }
+
+    public Plan planWithoutOptimize(Analysis analysis, Stage stage)
+    {
+        log.info("[PlanDebug]start to plan Statement without optimizer " + analysis.getStatement().toString());
+        PlanNode root = planStatement(analysis, analysis.getStatement());
+        log.info("[PlanDebug]finished plan Statement without optimizer " + analysis.getStatement().toString());
+        planSanityChecker.validateIntermediatePlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
+
+
+        if (stage.ordinal() >= Stage.OPTIMIZED_AND_VALIDATED.ordinal()) {
+            // make sure we produce a valid plan after optimizations run. This is mainly to catch programming errors
+            planSanityChecker.validateFinalPlan(root, session, metadata, sqlParser, symbolAllocator.getTypes());
+        }
+
+        return new Plan(root, symbolAllocator.getTypes());
+    }
+
 
     public Plan planWithItegrateNumber(Analysis analysis, Stage stage, int number)
     {

@@ -134,12 +134,8 @@ public class QueryExplainer
 
         switch (planType) {
             case LOGICAL:
-                int totalOpt = planOptimizers.size();
-                for (int i = 0; i < totalOpt; i++) {
-                    log.info("plan with optimizer limit " + i);
-                    Plan plan = getLogicalPlanWithNum(session, statement, parameters, totalOpt);
-                    log.info("plan with optimizer to " + i + " is : " + PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes(), metadata.getFunctionRegistry(), statsCalculator, costCalculator, session, 0, false));
-                }
+                Plan planWithoutOptimizer = getLogicalPlanWithoutOptimizer(session, statement, parameters);
+                log.info("[PlanDebug]LogicPlan without optimizer is " + PlanPrinter.textLogicalPlan(planWithoutOptimizer.getRoot(), planWithoutOptimizer.getTypes(), metadata.getFunctionRegistry(), statsCalculator, costCalculator, session, 0, false));
                 Plan plan = getLogicalPlan(session, statement, parameters);
                 return PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes(), metadata.getFunctionRegistry(), statsCalculator, costCalculator, session, 0, false);
             case DISTRIBUTED:
@@ -203,6 +199,20 @@ public class QueryExplainer
         LogicalPlanner logicalPlanner = new LogicalPlanner(session, planOptimizers, idAllocator, metadata, sqlParser);
         return logicalPlanner.plan(analysis);
     }
+
+
+    public Plan getLogicalPlanWithoutOptimizer(Session session, Statement statement, List<Expression> parameters)
+    {
+        // analyze statement
+        Analysis analysis = analyze(session, statement, parameters);
+
+        PlanNodeIdAllocator idAllocator = new PlanNodeIdAllocator();
+
+        // plan statement
+        LogicalPlanner logicalPlanner = new LogicalPlanner(session, planOptimizers, idAllocator, metadata, sqlParser);
+        return logicalPlanner.planWithoutOptimize(analysis,LogicalPlanner.Stage.OPTIMIZED_AND_VALIDATED);
+    }
+
 
     public Plan getLogicalPlanWithNum(Session session, Statement statement, List<Expression> parameters, int number)
     {

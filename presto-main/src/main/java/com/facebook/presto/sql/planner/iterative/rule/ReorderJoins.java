@@ -274,6 +274,10 @@ public class ReorderJoins
                     requiredJoinSymbols.stream()
                             .filter(rightSymbols::contains)
                             .collect(toImmutableList()));
+
+            if(leftResult.getPlanNode().isPresent() && rightResult.getPlanNode().isPresent())
+                log.info("[PlanDebug] left result is " + leftResult.planNode.get().getId() + " with cost " +leftResult.getCost().toString() + " right Result is "+rightResult.planNode.get().getId() + " with cost " +rightResult.getCost().toString());
+
             if (rightResult.equals(UNKNOWN_COST_RESULT)) {
                 return UNKNOWN_COST_RESULT;
             }
@@ -283,6 +287,7 @@ public class ReorderJoins
 
             PlanNode right = rightResult.planNode.orElseThrow(() -> new VerifyException("Plan node is not present"));
 
+            log.info("[PlanDebug]left plan node is " + left.getId().toString() + ", right is " + right.getId().toString());
             // sort output symbols so that the left input symbols are first
             List<Symbol> sortedOutputSymbols = Stream.concat(left.getOutputSymbols().stream(), right.getOutputSymbols().stream())
                     .filter(outputSymbols::contains)
