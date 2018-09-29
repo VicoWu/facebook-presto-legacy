@@ -80,7 +80,7 @@ public class ComposableStatsCalculator
     private static <T extends PlanNode> Optional<PlanNodeStatsEstimate> calculateStats(Rule<T> rule, PlanNode node, StatsProvider sourceStats, Lookup lookup, Session session, TypeProvider types)
     {
         Optional<PlanNodeStatsEstimate> calculatedStats = rule.calculate((T) node, sourceStats, lookup, session, types);
-        log.info("[PlanDebug]calculateStats by rule " + rule.getClass().getName() + ".result(OutputRowCount) is " + (calculatedStats.isPresent() ? "NaN" : calculatedStats.get().getOutputRowCount()));
+        log.info("[PlanDebug]calculateStats by rule " + rule.getClass().getName() + ".result(OutputRowCount) is " + (!calculatedStats.isPresent() ? "NaN" : calculatedStats.get().getOutputRowCount()));
         return calculatedStats;
     }
 
