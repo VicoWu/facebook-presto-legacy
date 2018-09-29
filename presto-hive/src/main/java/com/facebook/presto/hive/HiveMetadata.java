@@ -531,7 +531,7 @@ public class HiveMetadata
             return EMPTY_STATISTICS;
         }
         List<HivePartition> hivePartitions = getPartitionsAsList(tableHandle, constraint);
-        log.info("[PlanDebug]computing hivePartitions for constraint " + constraint.getSummary().toString(session) + ". partitions size is " + ((hivePartitions==null || hivePartitions.size()==0 )? 0 : hivePartitions.size() ));
+        log.info("[PlanDebug]computing hivePartitions for constraint " + constraint.getSummary().toString(session) + ". partitions size is " + ((hivePartitions == null || hivePartitions.size() == 0) ? 0 : hivePartitions.size()));
         Map<String, ColumnHandle> tableColumns = getColumnHandles(session, tableHandle)
                 .entrySet().stream()
                 .filter(entry -> !((HiveColumnHandle) entry.getValue()).isHidden())
