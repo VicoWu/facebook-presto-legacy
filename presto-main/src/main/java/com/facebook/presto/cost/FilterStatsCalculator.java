@@ -97,9 +97,11 @@ public class FilterStatsCalculator
             TypeProvider types)
     {
         Expression simplifiedExpression = simplifyExpression(session, predicate, types);
-        return new FilterExpressionStatsCalculatingVisitor(statsEstimate, session, types)
+        PlanNodeStatsEstimate est = new FilterExpressionStatsCalculatingVisitor(statsEstimate, session, types)
                 .process(simplifiedExpression)
                 .orElseGet(() -> normalizer.normalize(filterStatsForUnknownExpression(statsEstimate), types));
+        log.info("[PlanDebug] FilterStatsCalculator start to filter the estimate! result is " + (est != null ? est.getOutputRowCount() : null));
+        return est;
     }
 
     private Expression simplifyExpression(Session session, Expression predicate, TypeProvider types)

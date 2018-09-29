@@ -19,6 +19,7 @@ import com.facebook.presto.matching.Pattern;
 import com.facebook.presto.sql.planner.TypeProvider;
 import com.facebook.presto.sql.planner.iterative.Lookup;
 import com.facebook.presto.sql.planner.plan.FilterNode;
+import io.airlift.log.Logger;
 
 import java.util.Optional;
 
@@ -30,6 +31,8 @@ public class FilterStatsRule
     private static final Pattern<FilterNode> PATTERN = filter();
 
     private final FilterStatsCalculator filterStatsCalculator;
+
+    private static final Logger log = Logger.get(FilterStatsRule.class);
 
     public FilterStatsRule(FilterStatsCalculator filterStatsCalculator)
     {
@@ -46,6 +49,7 @@ public class FilterStatsRule
     public Optional<PlanNodeStatsEstimate> calculate(FilterNode node, StatsProvider statsProvider, Lookup lookup, Session session, TypeProvider types)
     {
         PlanNodeStatsEstimate sourceStats = statsProvider.getStats(node.getSource());
+        log.info("[PlanDebug] start to calculate statis in FilterStatsRule for " +node.getId().toString()+ " ! statsProvider is " + statsProvider);
         return Optional.of(filterStatsCalculator.filterStats(sourceStats, node.getPredicate(), session, types));
     }
 }

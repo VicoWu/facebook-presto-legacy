@@ -21,6 +21,7 @@ import com.facebook.presto.sql.planner.iterative.Lookup;
 import com.facebook.presto.sql.planner.plan.PlanNode;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import io.airlift.log.Logger;
 
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class ComposableStatsCalculator
         implements StatsCalculator
 {
     private final ListMultimap<Class<?>, Rule<?>> rulesByRootType;
-
+    private static final Logger log = Logger.get(ComposableStatsCalculator.class);
     public ComposableStatsCalculator(List<Rule<?>> rules)
     {
         this.rulesByRootType = rules.stream()
@@ -69,6 +70,7 @@ public class ComposableStatsCalculator
             Rule<?> rule = ruleIterator.next();
             Optional<PlanNodeStatsEstimate> calculatedStats = calculateStats(rule, node, sourceStats, lookup, session, types);
             if (calculatedStats.isPresent()) {
+                log.info("[PlanDebug] Got statistics information for node " + node.getId() + ". row count is " +calculatedStats.get().getOutputRowCount());
                 return calculatedStats.get();
             }
         }
@@ -77,7 +79,10 @@ public class ComposableStatsCalculator
 
     private static <T extends PlanNode> Optional<PlanNodeStatsEstimate> calculateStats(Rule<T> rule, PlanNode node, StatsProvider sourceStats, Lookup lookup, Session session, TypeProvider types)
     {
-        return rule.calculate((T) node, sourceStats, lookup, session, types);
+
+        Optional<PlanNodeStatsEstimate> calculatedStats = rule.calculate((T) node, sourceStats, lookup, session, types);
+        log.info("[PlanDebug]calculateStats by rule " + rule.getClass().getName() + ".result(OutputRowCount) is " + (calculatedStats.isPresent() ? "NaN" : calculatedStats.get().getOutputRowCount()));
+        return calculatedStats;
     }
 
     public interface Rule<T extends PlanNode>

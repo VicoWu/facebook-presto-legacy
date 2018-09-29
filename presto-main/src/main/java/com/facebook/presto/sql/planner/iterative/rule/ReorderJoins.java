@@ -278,6 +278,7 @@ public class ReorderJoins
             if(leftResult.getPlanNode().isPresent() && rightResult.getPlanNode().isPresent()) {
                 log.info("[PlanDebug] left result is " + leftResult.planNode.get().getId() + " with cost " + leftResult.getCost().toString() + " right Result is  " + rightResult.planNode.get().getId() + " with cost " + rightResult.getCost().toString());
             }
+
             if (rightResult.equals(UNKNOWN_COST_RESULT)) {
                 return UNKNOWN_COST_RESULT;
             }

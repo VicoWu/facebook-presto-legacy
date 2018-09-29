@@ -19,6 +19,7 @@ import com.facebook.presto.sql.planner.iterative.GroupReference;
 import com.facebook.presto.sql.planner.iterative.Lookup;
 import com.facebook.presto.sql.planner.iterative.Memo;
 import com.facebook.presto.sql.planner.plan.PlanNode;
+import io.airlift.log.Logger;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -39,6 +40,7 @@ public final class CachingStatsProvider
 
     private final Map<PlanNode, PlanNodeStatsEstimate> cache = new IdentityHashMap<>();
 
+    private static final Logger log = Logger.get(CachingStatsProvider.class);
     public CachingStatsProvider(StatsCalculator statsCalculator, Session session, TypeProvider types)
     {
         this(statsCalculator, Optional.empty(), noLookup(), session, types);
@@ -67,6 +69,7 @@ public final class CachingStatsProvider
             return stats;
         }
 
+        log.info("[PlanDebug] start to compute statistic for plannode " + node.getId().toString() + " with statistic provider " + statsCalculator.getClass().getName());
         stats = statsCalculator.calculateStats(node, this, lookup, session, types);
         verify(cache.put(node, stats) == null, "Stats already set");
         return stats;
