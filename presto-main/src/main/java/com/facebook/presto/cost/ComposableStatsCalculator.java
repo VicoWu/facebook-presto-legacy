@@ -70,7 +70,7 @@ public class ComposableStatsCalculator
             Rule<?> rule = ruleIterator.next();
             Optional<PlanNodeStatsEstimate> calculatedStats = calculateStats(rule, node, sourceStats, lookup, session, types);
             if (calculatedStats.isPresent()) {
-                log.info("[PlanDebug] Got statistics information for node " + node.getId() + ". row count is " +calculatedStats.get().getOutputRowCount());
+                log.info("[PlanDebug] Got statistics information for node " + node.getId() + ". row count is " + calculatedStats.get().getOutputRowCount());
                 return calculatedStats.get();
             }
         }
@@ -79,7 +79,6 @@ public class ComposableStatsCalculator
 
     private static <T extends PlanNode> Optional<PlanNodeStatsEstimate> calculateStats(Rule<T> rule, PlanNode node, StatsProvider sourceStats, Lookup lookup, Session session, TypeProvider types)
     {
-
         Optional<PlanNodeStatsEstimate> calculatedStats = rule.calculate((T) node, sourceStats, lookup, session, types);
         log.info("[PlanDebug]calculateStats by rule " + rule.getClass().getName() + ".result(OutputRowCount) is " + (calculatedStats.isPresent() ? "NaN" : calculatedStats.get().getOutputRowCount()));
         return calculatedStats;

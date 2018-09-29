@@ -200,7 +200,6 @@ public class QueryExplainer
         return logicalPlanner.plan(analysis);
     }
 
-
     public Plan getLogicalPlanWithoutOptimizer(Session session, Statement statement, List<Expression> parameters)
     {
         // analyze statement
@@ -210,9 +209,8 @@ public class QueryExplainer
 
         // plan statement
         LogicalPlanner logicalPlanner = new LogicalPlanner(session, planOptimizers, idAllocator, metadata, sqlParser);
-        return logicalPlanner.planWithoutOptimize(analysis,LogicalPlanner.Stage.OPTIMIZED_AND_VALIDATED);
+        return logicalPlanner.planWithoutOptimize(analysis, LogicalPlanner.Stage.OPTIMIZED_AND_VALIDATED);
     }
-
 
     public Plan getLogicalPlanWithNum(Session session, Statement statement, List<Expression> parameters, int number)
     {

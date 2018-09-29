@@ -41,7 +41,8 @@ public class OutputStatsRule
     @Override
     public Optional<PlanNodeStatsEstimate> calculate(OutputNode node, StatsProvider sourceStats, Lookup lookup, Session session, TypeProvider types)
     {
-        Optional<PlanNodeStatsEstimate> rest =  Optional.of(sourceStats.getStats(node.getSource()));
-        log.info("[PlanDebug] start to calculate stats in OutputStatsRule for " +node.getId().toString()+ " ! statsProvider is " + sourceStats);
+        Optional<PlanNodeStatsEstimate> rest = Optional.of(sourceStats.getStats(node.getSource()));
+        log.info("[PlanDebug] start to calculate stats in OutputStatsRule for " + node.getId().toString() + " ! statsProvider is " + sourceStats);
+        return rest;
     }
 }

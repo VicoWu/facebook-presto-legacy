@@ -275,7 +275,7 @@ public class ReorderJoins
                             .filter(rightSymbols::contains)
                             .collect(toImmutableList()));
 
-            if(leftResult.getPlanNode().isPresent() && rightResult.getPlanNode().isPresent()) {
+            if (leftResult.getPlanNode().isPresent() && rightResult.getPlanNode().isPresent()) {
                 log.info("[PlanDebug] left result is " + leftResult.planNode.get().getId() + " with cost " + leftResult.getCost().toString() + " right Result is  " + rightResult.planNode.get().getId() + " with cost " + rightResult.getCost().toString());
             }
 
