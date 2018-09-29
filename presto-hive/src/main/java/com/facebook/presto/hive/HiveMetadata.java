@@ -80,6 +80,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.airlift.json.JsonCodec;
+import io.airlift.log.Logger;
 import io.airlift.slice.Slice;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.TableType;
@@ -227,6 +228,8 @@ public class HiveMetadata
     private final String prestoVersion;
     private final HiveStatisticsProvider hiveStatisticsProvider;
     private final int maxPartitions;
+
+    private static final Logger log = Logger.get(HiveMetadata.class);
 
     public HiveMetadata(
             SemiTransactionalHiveMetastore metastore,
@@ -528,6 +531,7 @@ public class HiveMetadata
             return EMPTY_STATISTICS;
         }
         List<HivePartition> hivePartitions = getPartitionsAsList(tableHandle, constraint);
+        log.info("[PlanDebug]computing hivePartitions for constraint " + constraint.getSummary().toString(session) + ". partitions size is " + ((hivePartitions==null || hivePartitions.size()==0 )? 0 : hivePartitions.size() ));
         Map<String, ColumnHandle> tableColumns = getColumnHandles(session, tableHandle)
                 .entrySet().stream()
                 .filter(entry -> !((HiveColumnHandle) entry.getValue()).isHidden())

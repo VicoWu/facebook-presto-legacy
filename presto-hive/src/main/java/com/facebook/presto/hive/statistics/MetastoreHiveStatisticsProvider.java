@@ -101,6 +101,7 @@ public class MetastoreHiveStatisticsProvider
         }
 
         int queriedPartitionsCount = queriedPartitions.size();
+
         int sampleSize = getPartitionStatisticsSampleSize(session);
         List<HivePartition> samplePartitions = getPartitionsSample(queriedPartitions, sampleSize);
 
@@ -109,6 +110,7 @@ public class MetastoreHiveStatisticsProvider
         TableStatistics.Builder tableStatistics = TableStatistics.builder();
         OptionalDouble rowsPerPartition = calculateRowsPerPartition(statisticsSample);
         Estimate rowCount = calculateRowsCount(rowsPerPartition, queriedPartitionsCount);
+        log.info("[PlanDebug]queriedPartitionsCount is " + queriedPartitionsCount + ", rowsPerPartition is " + rowsPerPartition + ", rowCount is " + rowCount.getValue());
         tableStatistics.setRowCount(rowCount);
         for (Map.Entry<String, ColumnHandle> columnEntry : tableColumns.entrySet()) {
             String columnName = columnEntry.getKey();
