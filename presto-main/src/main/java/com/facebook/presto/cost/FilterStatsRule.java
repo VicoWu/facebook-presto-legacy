@@ -49,7 +49,7 @@ public class FilterStatsRule
     public Optional<PlanNodeStatsEstimate> calculate(FilterNode node, StatsProvider statsProvider, Lookup lookup, Session session, TypeProvider types)
     {
         PlanNodeStatsEstimate sourceStats = statsProvider.getStats(node.getSource());
-        log.info("[PlanDebug] start to calculate statis in FilterStatsRule for " +node.getId().toString()+ " ! statsProvider is " + statsProvider);
+        log.info("[PlanDebug] start to calculate statis in FilterStatsRule for " + node.getId().toString() + " ! statsProvider is " + statsProvider);
         return Optional.of(filterStatsCalculator.filterStats(sourceStats, node.getPredicate(), session, types));
     }
 }
