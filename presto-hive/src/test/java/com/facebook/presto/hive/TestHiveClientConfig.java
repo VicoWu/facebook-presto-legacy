@@ -109,7 +109,8 @@ public class TestHiveClientConfig
                 .setHdfsWireEncryptionEnabled(false)
                 .setPartitionStatisticsSampleSize(100)
                 .setIgnoreCorruptedStatistics(false)
-                .setCollectColumnStatisticsOnWrite(false));
+                .setCollectColumnStatisticsOnWrite(false)
+                .setNegativeStatisticCountEnabled(false));
     }
 
     @Test
@@ -188,6 +189,7 @@ public class TestHiveClientConfig
                 .put("hive.partition-statistics-sample-size", "1234")
                 .put("hive.ignore-corrupted-statistics", "true")
                 .put("hive.collect-column-statistics-on-write", "true")
+                .put("hive.negative-count-statistics-enabled", "true")
                 .build();
 
         HiveClientConfig expected = new HiveClientConfig()
@@ -262,7 +264,8 @@ public class TestHiveClientConfig
                 .setHdfsWireEncryptionEnabled(true)
                 .setPartitionStatisticsSampleSize(1234)
                 .setIgnoreCorruptedStatistics(true)
-                .setCollectColumnStatisticsOnWrite(true);
+                .setCollectColumnStatisticsOnWrite(true)
+                .setNegativeStatisticCountEnabled(true);
 
         ConfigAssertions.assertFullMapping(properties, expected);
     }

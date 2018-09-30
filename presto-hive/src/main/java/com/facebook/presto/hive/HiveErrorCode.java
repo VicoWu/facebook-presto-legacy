@@ -62,6 +62,7 @@ public enum HiveErrorCode
     HIVE_TABLE_DROPPED_DURING_QUERY(35, EXTERNAL),
     // HIVE_TOO_MANY_BUCKET_SORT_FILES(36) is deprecated
     HIVE_CORRUPTED_COLUMN_STATISTICS(37, EXTERNAL),
+    HIVE_NULL_COLUMN_NEGATIVE_STATISTICS(38, EXTERNAL),
     /**/;
 
     private final ErrorCode errorCode;

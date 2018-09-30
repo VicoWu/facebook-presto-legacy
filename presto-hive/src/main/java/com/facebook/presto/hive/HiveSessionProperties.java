@@ -73,6 +73,7 @@ public final class HiveSessionProperties
     private static final String PARTITION_STATISTICS_SAMPLE_SIZE = "partition_statistics_sample_size";
     private static final String IGNORE_CORRUPTED_STATISTICS = "ignore_corrupted_statistics";
     private static final String COLLECT_COLUMN_STATISTICS_ON_WRITE = "collect_column_statistics_on_write";
+    private static final String HIVE_NEGATIVE_COUNT_STATISTICS_ENABLED = "hive.negative-count-statistics-enabled";
 
     private final List<PropertyMetadata<?>> sessionProperties;
 
@@ -266,6 +267,11 @@ public final class HiveSessionProperties
                         COLLECT_COLUMN_STATISTICS_ON_WRITE,
                         "Experimental: Enables automatic column level statistics collection on write",
                         hiveClientConfig.isCollectColumnStatisticsOnWrite(),
+                        false),
+                booleanProperty(
+                        HIVE_NEGATIVE_COUNT_STATISTICS_ENABLED,
+                        "Experimental: Whether or not hive negative count statistics is enabled",
+                        hiveClientConfig.isNegativeStatisticCountEnabled(),
                         false));
     }
 
@@ -451,6 +457,11 @@ public final class HiveSessionProperties
     public static boolean isCollectColumnStatisticsOnWrite(ConnectorSession session)
     {
         return session.getProperty(COLLECT_COLUMN_STATISTICS_ON_WRITE, Boolean.class);
+    }
+
+    public static boolean isNegativeStatisticCountEnabled(ConnectorSession session)
+    {
+        return session.getProperty(HIVE_NEGATIVE_COUNT_STATISTICS_ENABLED, Boolean.class);
     }
 
     public static PropertyMetadata<DataSize> dataSizeSessionProperty(String name, String description, DataSize defaultValue, boolean hidden)

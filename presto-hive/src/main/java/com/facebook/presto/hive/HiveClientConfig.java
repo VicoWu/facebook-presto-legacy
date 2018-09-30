@@ -139,6 +139,7 @@ public class HiveClientConfig
     private int partitionStatisticsSampleSize = 100;
     private boolean ignoreCorruptedStatistics;
     private boolean collectColumnStatisticsOnWrite;
+    private boolean negativeStatisticCountEnabled;
 
     public int getMaxInitialSplits()
     {
@@ -1118,6 +1119,19 @@ public class HiveClientConfig
     public HiveClientConfig setCollectColumnStatisticsOnWrite(boolean collectColumnStatisticsOnWrite)
     {
         this.collectColumnStatisticsOnWrite = collectColumnStatisticsOnWrite;
+        return this;
+    }
+
+    @Config("hive.negative-count-statistics-enabled")
+    @ConfigDescription("Whether or not hive negative count statistics is enabled")
+    public boolean isNegativeStatisticCountEnabled()
+    {
+        return negativeStatisticCountEnabled;
+    }
+
+    public HiveClientConfig setNegativeStatisticCountEnabled(boolean negativeStatisticCountEnabled)
+    {
+        this.negativeStatisticCountEnabled = negativeStatisticCountEnabled;
         return this;
     }
 }

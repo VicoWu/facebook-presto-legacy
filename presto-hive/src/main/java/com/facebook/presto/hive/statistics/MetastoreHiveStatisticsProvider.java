@@ -16,6 +16,7 @@ package com.facebook.presto.hive.statistics;
 
 import com.facebook.presto.hive.HiveBasicStatistics;
 import com.facebook.presto.hive.HiveColumnHandle;
+import com.facebook.presto.hive.HiveErrorCode;
 import com.facebook.presto.hive.HivePartition;
 import com.facebook.presto.hive.PartitionStatistics;
 import com.facebook.presto.hive.metastore.DateStatistics;
@@ -60,9 +61,11 @@ import java.util.OptionalLong;
 import java.util.Set;
 
 import static com.facebook.presto.hive.HiveErrorCode.HIVE_CORRUPTED_COLUMN_STATISTICS;
+import static com.facebook.presto.hive.HiveErrorCode.HIVE_NULL_COLUMN_NEGATIVE_STATISTICS;
 import static com.facebook.presto.hive.HivePartition.UNPARTITIONED_ID;
 import static com.facebook.presto.hive.HiveSessionProperties.getPartitionStatisticsSampleSize;
 import static com.facebook.presto.hive.HiveSessionProperties.isIgnoreCorruptedStatistics;
+import static com.facebook.presto.hive.HiveSessionProperties.isNegativeStatisticCountEnabled;
 import static com.facebook.presto.hive.HiveSessionProperties.isStatisticsEnabled;
 import static com.facebook.presto.spi.type.BigintType.BIGINT;
 import static com.facebook.presto.spi.type.Chars.isCharType;
@@ -143,7 +146,8 @@ public class MetastoreHiveStatisticsProvider
             return getTableStatistics(columns, columnTypes, partitions, statisticsSample);
         }
         catch (PrestoException e) {
-            if (e.getErrorCode().equals(HIVE_CORRUPTED_COLUMN_STATISTICS.toErrorCode()) && isIgnoreCorruptedStatistics(session)) {
+            if (e.getErrorCode().equals(HIVE_CORRUPTED_COLUMN_STATISTICS.toErrorCode()) && isIgnoreCorruptedStatistics(session)
+                    || e.getErrorCode().equals(HIVE_NULL_COLUMN_NEGATIVE_STATISTICS.toErrorCode()) && isNegativeStatisticCountEnabled(session)) {
                 log.error(e);
                 return TableStatistics.empty();
             }
@@ -219,6 +223,7 @@ public class MetastoreHiveStatisticsProvider
         columnStatistics.getTotalSizeInBytes().ifPresent(totalSizeInBytes ->
                 checkStatistics(totalSizeInBytes >= 0, table, partition, column, "totalSizeInBytes must be greater than or equal to zero: %s", totalSizeInBytes));
         columnStatistics.getNullsCount().ifPresent(nullsCount -> {
+            checkMinusOneNullsCountStatistic(nullsCount != -1, table, partition, column, "nullCount should not be -1");
             checkStatistics(nullsCount >= 0, table, partition, column, "nullsCount must be greater than or equal to zero: %s", nullsCount);
             if (rowCount.isPresent()) {
                 checkStatistics(
@@ -340,6 +345,15 @@ public class MetastoreHiveStatisticsProvider
                         rowCount.getAsLong());
             }
         });
+    }
+
+    private static void checkMinusOneNullsCountStatistic(boolean expression, SchemaTableName table, String partition, String column, String message, Object... args)
+    {
+        if (!expression) {
+            throw new PrestoException(
+                    HIVE_NULL_COLUMN_NEGATIVE_STATISTICS,
+                    format("Corrupted partition statistics (Table: %s Partition: [%s] Column: %s): %s", table, partition, column, format(message, args)));
+        }
     }
 
     private static void checkStatistics(boolean expression, SchemaTableName table, String partition, String column, String message, Object... args)
@@ -658,6 +672,9 @@ public class MetastoreHiveStatisticsProvider
             HiveColumnStatistics columnStatistics = statistics.getColumnStatistics().get(column);
             verify(columnStatistics != null, "columnStatistics is null");
             long nullsCount = columnStatistics.getNullsCount().orElseThrow(() -> new VerifyException("nullsCount is not present"));
+            if (nullsCount == -1L) {
+                throw new PrestoException(HiveErrorCode.HIVE_NULL_COLUMN_NEGATIVE_STATISTICS, "nullCount must not be -1");
+            }
             verify(nullsCount >= 0, "nullsCount must be greater than or equal to zero");
             verify(nullsCount <= rowCount, "nullsCount must be less than or equal to rowCount. nullsCount: %s. rowCount: %s.", nullsCount, rowCount);
             totalNullsCount += nullsCount;
