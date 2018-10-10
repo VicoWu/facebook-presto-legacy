@@ -515,6 +515,7 @@ public class HiveMetadata
         if (!isStatisticsEnabled(session)) {
             return EMPTY_STATISTICS;
         }
+        //通过查询条件约束，计算所涉及到的的所有partition，这将用来估算这次TableScan输出的数据量
         List<HivePartition> hivePartitions = getPartitionsAsList(tableHandle, constraint);
         Map<String, ColumnHandle> tableColumns = getColumnHandles(session, tableHandle)
                 .entrySet().stream()

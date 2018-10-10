@@ -260,6 +260,7 @@ public class SourcePartitionedScheduler
                 }
             }
 
+            //节点和splits之间的一对多关系
             Multimap<Node, Split> splitAssignment = ImmutableMultimap.of();
             if (!pendingSplits.isEmpty()) {
                 if (!scheduleGroup.placementFuture.isDone()) {

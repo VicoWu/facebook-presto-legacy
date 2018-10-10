@@ -159,7 +159,7 @@ public class PlanPrinter
             TypeProvider types,
             Optional<StageExecutionStrategy> stageExecutionStrategy,
             FunctionRegistry functionRegistry,
-            StatsProvider statsProvider,
+            StatsProvider statsProvider, //这个的costProvider是CachingCostProvider, statsProvider是CachingStatsProvider
             CostProvider costProvider,
             Session session,
             Optional<Map<PlanNodeId, PlanNodeStats>> stats,
@@ -1397,11 +1397,12 @@ public class PlanPrinter
 
         private String formatPlanNodeStatsAndCost(PlanNode node)
         {
+            //这个的costProvider是CachingCostProvider, statsProvider是CachingStatsProvider
             PlanNodeStatsEstimate stats = statsProvider.getStats(node);
             PlanNodeCostEstimate cost = costProvider.getCumulativeCost(node);
             return String.format("{rows: %s (%s), cpu: %s, memory: %s, network: %s}",
-                    formatAsLong(stats.getOutputRowCount()),
-                    formatEstimateAsDataSize(stats.getOutputSizeInBytes(node.getOutputSymbols(), types)),
+                    formatAsLong(stats.getOutputRowCount()), //打印行总数
+                    formatEstimateAsDataSize(stats.getOutputSizeInBytes(node.getOutputSymbols(), types)), //打印数据总量
                     formatDouble(cost.getCpuCost()),
                     formatDouble(cost.getMemoryCost()),
                     formatDouble(cost.getNetworkCost()));

@@ -184,6 +184,9 @@ public final class InternalResourceGroupManager<C>
         }
     }
 
+    /**
+     * Group管理器开始不断的刷新， 对query和group本身进行调度
+     */
     private void refreshAndStartQueries()
     {
         long nanoTime = System.nanoTime();
@@ -214,18 +217,23 @@ public final class InternalResourceGroupManager<C>
         }
     }
 
+    /**
+     * SelectionContext代表当前使用的是哪个Group的Selector ， 最终在SqlQueryManager.createQueryInternal()中被调用
+     * @param context
+     * @param executor
+     */
     private synchronized void createGroupIfNecessary(SelectionContext<C> context, Executor executor)
     {
-        ResourceGroupId id = context.getResourceGroupId();
+        ResourceGroupId id = context.getResourceGroupId(); //通过selector,确定了当前选择的group
         if (!groups.containsKey(id)) {
             InternalResourceGroup group;
-            if (id.getParent().isPresent()) {
-                createGroupIfNecessary(new SelectionContext<>(id.getParent().get(), context.getContext()), executor);
+            if (id.getParent().isPresent()) { //如果这个group有parent，不是root group
+                createGroupIfNecessary(new SelectionContext<>(id.getParent().get(), context.getContext()), executor); //如果这个group没有创建，就创建，否则，直接获取
                 InternalResourceGroup parent = groups.get(id.getParent().get());
                 requireNonNull(parent, "parent is null");
                 group = parent.getOrCreateSubGroup(id.getLastSegment());
             }
-            else {
+            else { //匹配到了rootGroup
                 RootInternalResourceGroup root = new RootInternalResourceGroup(id.getSegments().get(0), this::exportGroup, executor);
                 group = root;
                 rootGroups.add(root);

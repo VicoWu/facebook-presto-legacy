@@ -80,6 +80,14 @@ public class HivePageSourceProvider
         this.typeManager = requireNonNull(typeManager, "typeManager is null");
     }
 
+    /**
+     * 这里的split对应hive的具体实现是HiveSplit
+     * @param transaction
+     * @param session
+     * @param split
+     * @param columns columns that should show up in the output page, in this order
+     * @return
+     */
     @Override
     public ConnectorPageSource createPageSource(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorSplit split, List<ColumnHandle> columns)
     {
@@ -153,6 +161,7 @@ public class HivePageSourceProvider
             return new BucketAdaptation(bucketColumnIndices, bucketColumnHiveTypes, conversion.getTableBucketCount(), conversion.getPartitionBucketCount(), bucketNumber.getAsInt());
         });
 
+        //我们可以在HiveClientModule中看到，对应不同的数据格式，会有不同的factory，比如OrcPageSourceFactory，ParquetPageSourceFactory，RcFileFileWriterFactory
         for (HivePageSourceFactory pageSourceFactory : pageSourceFactories) {
             Optional<? extends ConnectorPageSource> pageSource = pageSourceFactory.createPageSource(
                     configuration,
@@ -165,7 +174,7 @@ public class HivePageSourceProvider
                     toColumnHandles(regularAndInterimColumnMappings, true),
                     effectivePredicate,
                     hiveStorageTimeZone);
-            if (pageSource.isPresent()) {
+            if (pageSource.isPresent()) { //用HivePageSource封装具体的与数据格式相关的PageSource
                 return Optional.of(
                         new HivePageSource(
                                 columnMappings,

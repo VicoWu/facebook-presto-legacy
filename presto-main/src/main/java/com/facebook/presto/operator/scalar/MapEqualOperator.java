@@ -11,7 +11,7 @@ package com.facebook.presto.operator.scalar;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */hive.metastore.uri
 
 import com.facebook.presto.spi.block.Block;
 import com.facebook.presto.spi.function.OperatorDependency;

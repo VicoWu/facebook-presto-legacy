@@ -63,6 +63,11 @@ public class CachingCostProvider
         this.sourceProvider = requireNonNull(sourceProvider, "sourceProvider is null");
     }
 
+    /**
+     * 这个方法在DetermineJoinDistribution.getJoinNodeWithCost()中被调用，用来根据当前的PlanNode生成对应的cost，cost还是包括三个维度，即CPU，内存和network
+     * @param node
+     * @return
+     */
     @Override
     public PlanNodeCostEstimate getCumulativeCost(PlanNode node)
     {

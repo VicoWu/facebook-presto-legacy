@@ -515,8 +515,8 @@ public class InternalResourceGroup
             }
 
             // Switch to the appropriate queue implementation to implement the desired policy
-            Queue<InternalResourceGroup> queue;
-            UpdateablePriorityQueue<ManagedQueryExecution> queryQueue;
+            Queue<InternalResourceGroup> queue; //queue is used to schedule the group
+            UpdateablePriorityQueue<ManagedQueryExecution> queryQueue; //queryQueue is used to schedule the pending query
             switch (policy) {
                 case FAIR:
                     queue = new FifoQueue<>();
@@ -846,6 +846,7 @@ public class InternalResourceGroup
         }
     }
 
+    //根据调度策略，对group进行调度
     private void addOrUpdateSubGroup(InternalResourceGroup group)
     {
         if (schedulingPolicy == WEIGHTED_FAIR) {

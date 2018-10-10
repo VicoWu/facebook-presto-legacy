@@ -86,6 +86,9 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * 区别与SQLPlaner和RelationPlaner QueryPlannner 用来处理Query和QuerySpecification
+ */
 class QueryPlanner
 {
     private final Analysis analysis;

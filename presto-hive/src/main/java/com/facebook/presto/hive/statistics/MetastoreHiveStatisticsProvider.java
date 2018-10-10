@@ -100,6 +100,7 @@ public class MetastoreHiveStatisticsProvider
             return TableStatistics.EMPTY_STATISTICS;
         }
 
+        //分区数量
         int queriedPartitionsCount = queriedPartitions.size();
         int sampleSize = getPartitionStatisticsSampleSize(session);
         List<HivePartition> samplePartitions = getPartitionsSample(queriedPartitions, sampleSize);
@@ -108,6 +109,7 @@ public class MetastoreHiveStatisticsProvider
 
         TableStatistics.Builder tableStatistics = TableStatistics.builder();
         OptionalDouble rowsPerPartition = calculateRowsPerPartition(statisticsSample);
+        // 这个方法会在生成逻辑执行计划的时候被调用，计算行数等统计信息，进而影响执行计划
         Estimate rowCount = calculateRowsCount(rowsPerPartition, queriedPartitionsCount);
         tableStatistics.setRowCount(rowCount);
         for (Map.Entry<String, ColumnHandle> columnEntry : tableColumns.entrySet()) {

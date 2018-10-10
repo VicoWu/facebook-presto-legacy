@@ -67,6 +67,7 @@ public final class CachingStatsProvider
             return stats;
         }
 
+        //查看ComposableStatsCalculator
         stats = statsCalculator.calculateStats(node, this, lookup, session, types);
         verify(cache.put(node, stats) == null, "Stats already set");
         return stats;

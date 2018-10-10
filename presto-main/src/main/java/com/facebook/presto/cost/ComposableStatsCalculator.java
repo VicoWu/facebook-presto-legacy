@@ -73,6 +73,7 @@ public class ComposableStatsCalculator
     @Override
     public PlanNodeStatsEstimate calculateStats(PlanNode node, StatsProvider sourceStats, Lookup lookup, Session session, TypeProvider types)
     {
+        //根据planNode的类型，取出对应的rule, 例如，如果是表扫描，那么就是TableScanStatsRule,  TableScanStatsRule这里会访问hive进进而生成对应的统计信息
         Iterator<Rule<?>> ruleIterator = getCandidates(node).iterator();
         while (ruleIterator.hasNext()) {
             Rule<?> rule = ruleIterator.next();
