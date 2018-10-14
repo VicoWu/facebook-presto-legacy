@@ -453,6 +453,7 @@ public class SqlQueryManager
             // it's not safe to do any of this, and we had bugs before where people reused this code in a method
             URI self = locationFactory.createQueryLocation(queryId);
 
+            log.error("Query finally failed! " + queryId, e);
             // if session creation failed, create a minimal session object
             if (session == null) {
                 session = Session.builder(new SessionPropertyManager())

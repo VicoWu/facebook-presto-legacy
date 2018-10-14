@@ -278,7 +278,11 @@ public class QueryMonitor
                             ofEpochMilli(queryStats.getCreateTime().getMillis()),
                             ofEpochMilli(queryStats.getExecutionStartTime().getMillis()),
                             ofEpochMilli(queryStats.getEndTime().getMillis())));
-
+            StringBuilder sb = new StringBuilder();
+            for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
+                sb.append(ele.toString() + "\n");
+            }
+            log.error("QueryMonitor get queryCompleteEvent for query " + queryInfo.getQueryId().getId() + "." + sb.toString());
             logQueryTimeline(queryInfo);
         }
         catch (JsonProcessingException e) {

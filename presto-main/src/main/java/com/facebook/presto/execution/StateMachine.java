@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
@@ -209,6 +210,13 @@ public class StateMachine<T>
         checkState(!Thread.holdsLock(lock), "Can not fire state change event while holding the lock");
         requireNonNull(newState, "newState is null");
 
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
+            sb.append(ele.toString() + "/n");
+        }
+
+        log.error("fireStateChanged in StateMachine call stack trace is " + sb.toString());
+
         safeExecute(() -> {
             checkState(!Thread.holdsLock(lock), "Can not notify while holding the lock");
             try {
@@ -298,6 +306,21 @@ public class StateMachine<T>
     private void safeExecute(Runnable command)
     {
         try {
+            log.info("executor type is  " + executor.getClass().getName());
+            if (executor instanceof ThreadPoolExecutor) {
+                ThreadPoolExecutor me = (ThreadPoolExecutor) executor;
+                log.info("Current StateMachine Executor is ThreadPoolExecutor.Thread name is " +
+                        "" + Thread.currentThread().getName() + " \n. pool information:"
+                        + "active count: " + me.getActiveCount()
+                        + ",core pool size: " + me.getCorePoolSize()
+                        + ", max pool size: " + me.getMaximumPoolSize()
+                        + ",queue remain: " + me.getQueue().remainingCapacity()
+                        + ",queue is empty: " + me.getQueue().isEmpty()
+                        + ",completed task: " + me.getCompletedTaskCount()
+                        + ", pool size:" + me.getPoolSize()
+                        + ":largest pool size:  " + me.getLargestPoolSize()
+                        + ": task count:" + me.getTaskCount());
+            }
             executor.execute(command);
         }
         catch (RejectedExecutionException e) {

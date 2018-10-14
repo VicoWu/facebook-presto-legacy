@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import io.airlift.log.Logger;
 import io.airlift.units.Duration;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -93,6 +94,8 @@ public final class SqlStageExecution
     private final AtomicReference<OutputBuffers> outputBuffers = new AtomicReference<>();
 
     private final ListenerManager<Set<Lifespan>> completedLifespansChangeListeners = new ListenerManager<>();
+
+    private static final Logger log = Logger.get(SqlStageExecution.class);
 
     public SqlStageExecution(
             StageId stageId,
@@ -479,8 +482,18 @@ public final class SqlStageExecution
                             .map(ExecutionFailureInfo::toException)
                             .orElse(new PrestoException(GENERIC_INTERNAL_ERROR, "A task failed for an unknown reason"));
                     stateMachine.transitionToFailed(failure);
+                    StringBuilder sb = new StringBuilder();
+                    for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
+                        sb.append(ele.toString() + "/n");
+                    }
+                    log.error("SqlStageExecution for query failed. " + sb.toString());
                 }
                 else if (taskState == TaskState.ABORTED) {
+                    StringBuilder sb = new StringBuilder();
+                    for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
+                        sb.append(ele.toString() + "/n");
+                    }
+                    log.error("SqlStageExecution for query aborted. " + sb.toString());
                     // A task should only be in the aborted state if the STAGE is done (ABORTED or FAILED)
                     stateMachine.transitionToFailed(new PrestoException(GENERIC_INTERNAL_ERROR, "A task is in the ABORTED state but stage is " + stageState));
                 }
