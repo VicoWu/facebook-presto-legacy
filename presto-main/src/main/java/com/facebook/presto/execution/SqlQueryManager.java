@@ -384,6 +384,12 @@ public class SqlQueryManager
         return queryCreationFuture;
     }
 
+    /**
+     * 这个方法在createQuery中被调用
+     * @param queryId
+     * @param sessionContext
+     * @param query
+     */
     private void createQueryInternal(QueryId queryId, SessionContext sessionContext, String query)
     {
         requireNonNull(queryId, "queryId is null");
@@ -443,6 +449,7 @@ public class SqlQueryManager
             }
             queryExecution = queryExecutionFactory.createQueryExecution(queryId, query, session, statement, parameters);
         }
+        // 这里抛出异常，应该是plan等等query初始化阶段就会发生
         catch (ParsingException | PrestoException | SemanticException e) {
             // This is intentionally not a method, since after the state change listener is registered
             // it's not safe to do any of this, and we had bugs before where people reused this code in a method
@@ -456,6 +463,7 @@ public class SqlQueryManager
                         .setPath(new SqlPath(Optional.empty()))
                         .build();
             }
+            //创建FailedQueryExecution,代表这个query失败了
             QueryExecution execution = new FailedQueryExecution(
                     queryId,
                     query,
@@ -463,7 +471,7 @@ public class SqlQueryManager
                     session,
                     self,
                     transactionManager,
-                    queryExecutor,
+                    queryExecutor, //执行具体任务的线程池，比如，任务状态发生切换的时候的执行
                     metadata,
                     e);
 
@@ -472,7 +480,7 @@ public class SqlQueryManager
 
                 QueryInfo queryInfo = execution.getQueryInfo();
                 queryMonitor.queryCreatedEvent(queryInfo);
-                queryMonitor.queryCompletedEvent(queryInfo);
+                queryMonitor.queryCompletedEvent(queryInfo); //query执行结束，在这里进行回调
                 stats.queryQueued();
                 stats.queryStarted();
                 stats.queryStopped();
@@ -489,6 +497,7 @@ public class SqlQueryManager
         QueryInfo queryInfo = queryExecution.getQueryInfo();
         queryMonitor.queryCreatedEvent(queryInfo);
 
+        //在这里添加回调。这个回调发生得很晚，为什么？
         queryExecution.addFinalQueryInfoListener(finalQueryInfo -> {
             try {
                 QueryInfo info = queryExecution.getQueryInfo();
@@ -497,7 +506,7 @@ public class SqlQueryManager
             }
             finally {
                 // execution MUST be added to the expiration queue or there will be a leak
-                expirationQueue.add(queryExecution);
+                expirationQueue.add(queryExecution); //加入过期队列，防止query长期存放在内存没有被remove
             }
         });
 

@@ -333,6 +333,7 @@ public class SqlQueryExecution
         return Optional.ofNullable(getQueryInfo().getFailureInfo()).map(ExecutionFailureInfo::getErrorCode);
     }
 
+    //这里的参数是一个lamda表达式
     @Override
     public void addFinalQueryInfoListener(StateChangeListener<QueryInfo> stateChangeListener)
     {

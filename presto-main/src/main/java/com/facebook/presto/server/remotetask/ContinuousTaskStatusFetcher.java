@@ -166,7 +166,7 @@ class ContinuousTaskStatusFetcher
         try (SetThreadName ignored = new SetThreadName("ContinuousTaskStatusFetcher-%s", taskId)) {
             updateStats(currentRequestStartNanos.get());
             try {
-                updateTaskStatus(value);
+                updateTaskStatus(value); //更新当前 task的状态
                 errorTracker.requestSucceeded();
             }
             finally {
@@ -213,8 +213,13 @@ class ContinuousTaskStatusFetcher
     {
         // change to new value if old value is not changed and new value has a newer version
         AtomicBoolean taskMismatch = new AtomicBoolean();
+        // taskStatus是一个StateMachine ，调用StateMachine.setIf方法，这里的oldValue在setIf方法中代表当前的状态
+        // 因此，如果前后状态不一致，或者当前状态是done，或者当前状态的版本大于新状态的版本，返回false,否则返回true，即只有当当前状态不是done，并且version <= 新状态，predicate才会返回true
         taskStatus.setIf(newValue, oldValue -> {
             // did the task instance id change
+            //我们通过SqlTask的构造函数可以看到，SQLTask的instanceId是每次创建这个task的时候通过UUID随机生成的，并且SqlTask 是在SqlTaskManager被cache到内存的，
+            //因此，如果我们发现instanceId发生了变化，这时候一定是同一个taskId之前在内存中存在，但是现在却不存在了，这是由于远程的workder发生了重启，缓存清空然后进行
+            //SqlTask的更新的时候发现不命中因此重新创建SqlTask导致的
             if (!isNullOrEmpty(oldValue.getTaskInstanceId()) && !oldValue.getTaskInstanceId().equals(newValue.getTaskInstanceId())) {
                 taskMismatch.set(true);
                 return false;
@@ -231,7 +236,7 @@ class ContinuousTaskStatusFetcher
             return true;
         });
 
-        if (taskMismatch.get()) {
+        if (taskMismatch.get()) { //发生了task的instanceId不一致的情况
             // This will also set the task status to FAILED state directly.
             // Additionally, this will issue a DELETE for the task to the worker.
             // While sending the DELETE is not required, it is preferred because a task was created by the previous request.

@@ -167,6 +167,7 @@ public class StageStateMachine
         return stageState.setIf(ABORTED, currentState -> !currentState.isDone());
     }
 
+    //可以看到，这里被调用的时间是query真正fail掉的时间，但是需要等很久，SqlQueryManager.createQueryInternal里面才会抛出异常，然后客户端断开链接
     public boolean transitionToFailed(Throwable throwable)
     {
         requireNonNull(throwable, "throwable is null");

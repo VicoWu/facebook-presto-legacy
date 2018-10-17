@@ -145,6 +145,9 @@ public class SqlTaskManager
         queryContexts = CacheBuilder.newBuilder().weakValues().build(CacheLoader.from(
                 queryId -> createQueryContext(queryId, localMemoryManager, nodeMemoryConfig, localSpillManager, gcMonitor, maxQueryUserMemoryPerNode, maxQueryTotalMemoryPerNode, maxQuerySpillPerNode)));
 
+        //这里定义了一个CacheLoader，这个CacheLoader可以理解为创建一个SQLTask的function，然后通过这个CacheLoader
+        //作为参数传递给CacheBuilder的实现类，这里CacheBuilder的默认实现类是LocalCacheBuilder
+        //这样，当我们通过taskId去更新一个task的时候，如果还没有这个task，就通过我们定义的这个function去创建
         tasks = CacheBuilder.newBuilder().build(CacheLoader.from(
                 taskId -> new SqlTask(
                         taskId,

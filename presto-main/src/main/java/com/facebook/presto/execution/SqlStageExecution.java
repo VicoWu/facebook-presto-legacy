@@ -93,6 +93,7 @@ public final class SqlStageExecution
 
     private final ListenerManager<Set<Lifespan>> completedLifespansChangeListeners = new ListenerManager<>();
 
+    //在SqlQueryScheduler.createStages中被构造
     public SqlStageExecution(
             StageId stageId,
             URI location,
@@ -105,6 +106,7 @@ public final class SqlStageExecution
             FailureDetector failureDetector,
             SplitSchedulerStats schedulerStats)
     {
+        //创建对应的Stage 状态机，用来管理Stage的状态变化，这里的StateMachine是StateStateMachine
         this(new StageStateMachine(
                         requireNonNull(stageId, "stageId is null"),
                         requireNonNull(location, "location is null"),
@@ -450,7 +452,7 @@ public final class SqlStageExecution
                         .map(this::rewriteTransportFailure)
                         .map(ExecutionFailureInfo::toException)
                         .orElse(new PrestoException(StandardErrorCode.GENERIC_INTERNAL_ERROR, "A task failed for an unknown reason"));
-                stateMachine.transitionToFailed(failure);
+                stateMachine.transitionToFailed(failure); // 调用StageStateMachine.transitionToFailed
             }
             else if (taskState == TaskState.ABORTED) {
                 // A task should only be in the aborted state if the STAGE is done (ABORTED or FAILED)

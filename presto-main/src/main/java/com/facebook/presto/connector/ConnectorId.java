@@ -28,6 +28,7 @@ public final class ConnectorId
 
     private final String catalogName;
 
+    //我们可以看到ConnectorId是用catalogName构造的，比如hive.properties中的connectorId=hive.hadoop2,因此我们可能会遇到异常，
     @JsonCreator
     public ConnectorId(String catalogName)
     {
@@ -64,7 +65,7 @@ public final class ConnectorId
     public String toString()
     {
         return catalogName;
-    }
+    } //这里toString打印的不是connector的名字，比如hive-hadoop2,而是 catalogName,即catalog目录下面properties文件的前缀
 
     public static boolean isInternalSystemConnector(ConnectorId connectorId)
     {

@@ -156,6 +156,7 @@ public class QueryStateMachine
 
     private final AtomicReference<ResourceGroupId> resourceGroup = new AtomicReference<>();
 
+    //与StageStateMachine对比，
     private QueryStateMachine(QueryId queryId, String query, Session session, URI self, boolean autoCommit, TransactionManager transactionManager, Executor executor, Ticker ticker, Metadata metadata)
     {
         this.queryId = requireNonNull(queryId, "queryId is null");
@@ -707,10 +708,11 @@ public class QueryStateMachine
         return true;
     }
 
+    //转入失败状态
     private boolean transitionToFinished()
     {
         cleanupQueryQuietly();
-        recordDoneStats();
+        recordDoneStats(); //将结束的相关信息，比如结束时间记录下来,这些信息将最终写入到eventListern的mysql中
 
         return queryState.setIf(FINISHED, currentState -> !currentState.isDone());
     }
@@ -718,7 +720,7 @@ public class QueryStateMachine
     public boolean transitionToFailed(Throwable throwable)
     {
         cleanupQueryQuietly();
-        recordDoneStats();
+        recordDoneStats();  // 将结束的相关信息，比如结束时间记录下来,这些信息将最终写入到eventListern的mysql中
 
         // NOTE: The failure cause must be set before triggering the state change, so
         // listeners can observe the exception. This is safe because the failure cause
@@ -766,6 +768,7 @@ public class QueryStateMachine
         }
     }
 
+    //记录query的结束时间
     private void recordDoneStats()
     {
         Duration durationSinceCreation = nanosSince(createNanos).convertToMostSuccinctTimeUnit();

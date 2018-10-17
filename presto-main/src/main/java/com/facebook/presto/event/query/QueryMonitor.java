@@ -229,6 +229,7 @@ public class QueryMonitor
                 log.debug(e, "Error creating explain plan");
             }
 
+            //query完成，通过eventListener插入数据库
             eventListenerManager.queryCompleted(
                     new QueryCompletedEvent(
                             new QueryMetadata(
@@ -283,7 +284,7 @@ public class QueryMonitor
                             ofEpochMilli(queryStats.getExecutionStartTime().getMillis()),
                             ofEpochMilli(queryStats.getEndTime().getMillis())));
 
-            logQueryTimeline(queryInfo);
+            logQueryTimeline(queryInfo); //打这行日志的时候，客户端的JDBC才会收到异常，但是这个时间点要明显晚于异常真正发生的时间，即晚于endTime
         }
         catch (JsonProcessingException e) {
             throw new RuntimeException(e);

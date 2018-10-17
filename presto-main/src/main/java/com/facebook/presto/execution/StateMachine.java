@@ -156,6 +156,7 @@ public class StateMachine<T>
                 return false;
             }
 
+            //只有当当前状态不等于新状态，并且predicate满足条件，才会将当前状态设置成新状态
             // if state did not change while, checking the predicate, apply the new state
             if (compareAndSet(currentState, newState)) {
                 return true;
@@ -298,6 +299,9 @@ public class StateMachine<T>
     private void safeExecute(Runnable command)
     {
         try {
+            //注意，这里的executor是一个线程池，我们逐渐追踪executor的形成，最终可以追踪到
+            //QueryStateMachine - TaskInfoFetcher - HttpRemoteTask - HttpRemoteTaskFactory.createRemoteTask()
+            // - HttpRemoteTaskFactory通过注入的方式在CoordinatorModule中的构造方法
             executor.execute(command);
         }
         catch (RejectedExecutionException e) {
