@@ -432,6 +432,7 @@ class Query
         // get the query info before returning
         // force update if query manager is closed
         QueryInfo queryInfo = queryManager.getFullQueryInfo(queryId);
+        log.info("Already got info for query " + queryId);
         queryManager.recordHeartbeat(queryId);
 
         // TODO: figure out a better way to do this
@@ -449,14 +450,17 @@ class Query
 
         closeExchangeClientIfNecessary(queryInfo);
 
-        // for queries with no output, return a fake result for clients that require it
+        // for queries with no output, return a fake result for clients that require it //成功返回的query
         if ((queryInfo.getState() == QueryState.FINISHED) && !queryInfo.getOutputStage().isPresent()) {
             columns = ImmutableList.of(new Column("result", BooleanType.BOOLEAN));
+            log.info("queries " + queryId + " with no output, return a fake result ");
             data = ImmutableSet.of(ImmutableList.of(true));
         }
 
         // only return a next if the query is not done or there is more data to send (due to buffering)
         URI nextResultsUri = null;
+
+        //不是final的，并且exchangeClient没有关闭
         if (!queryInfo.isFinalQueryInfo() || !exchangeClient.isClosed()) {
             nextResultsUri = createNextResultsUri(scheme, uriInfo);
         }
@@ -478,6 +482,7 @@ class Query
         startedTransactionId = queryInfo.getStartedTransactionId();
         clearTransactionId = queryInfo.isClearTransactionId();
 
+        QueryError qr = toQueryError(queryInfo);
         // first time through, self is null
         QueryResults queryResults = new QueryResults(
                 queryId.toString(),
@@ -487,10 +492,11 @@ class Query
                 columns,
                 data,
                 toStatementStats(queryInfo),
-                toQueryError(queryInfo),
+                qr,
                 queryInfo.getUpdateType(),
                 updateCount);
 
+        log.info("Query " + queryId.toString() + " return information: queryInfo state: " + queryInfo.getState() + ", query error " + (qr == null ? "null " : qr.toString() + ", query uri is " + queryHtmlUri));
         cacheLastResults(queryResults);
         return queryResults;
     }

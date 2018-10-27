@@ -48,6 +48,7 @@ import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.airlift.concurrent.SetThreadName;
+import io.airlift.log.Logger;
 import io.airlift.stats.TimeStat;
 import io.airlift.units.Duration;
 
@@ -120,6 +121,7 @@ public class SqlQueryScheduler
     private final boolean summarizeTaskInfo;
     private final AtomicBoolean started = new AtomicBoolean();
 
+    private static final Logger log = Logger.get(SqlQueryScheduler.class);
     public SqlQueryScheduler(QueryStateMachine queryStateMachine,
             LocationFactory locationFactory,
             StageExecutionPlan plan,
@@ -196,6 +198,7 @@ public class SqlQueryScheduler
                     return;
                 }
                 if (state == FAILED) {
+                    log.info("Stage " + stage.toString() + " in query " + queryStateMachine.getQueryId().getId() + " state is FAILED. will call queryStateMachine.transitionToFailed.");
                     queryStateMachine.transitionToFailed(stage.getStageInfo().getFailureCause().toException());
                 }
                 else if (state == ABORTED) {

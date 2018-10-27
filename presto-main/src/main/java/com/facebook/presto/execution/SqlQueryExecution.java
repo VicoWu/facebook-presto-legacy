@@ -544,6 +544,7 @@ public class SqlQueryExecution
             SqlQueryScheduler scheduler = queryScheduler.get();
 
             Optional<QueryInfo> finalQueryInfo = stateMachine.getFinalQueryInfo();
+            log.info("finalQueryInfo for query " + this.getQueryId().getId() + " is present ? " + finalQueryInfo.isPresent());
             if (finalQueryInfo.isPresent()) {
                 return finalQueryInfo.get();
             }
@@ -585,9 +586,11 @@ public class SqlQueryExecution
         QueryInfo queryInfo = stateMachine.updateQueryInfo(stageInfo);
         if (queryInfo.isFinalQueryInfo()) {
             // capture the final query state and drop reference to the scheduler
+            log.info("query " + queryInfo.getQueryId().getId() + " is Final Query Info.");
             queryScheduler.set(null);
         }
 
+        log.info("query " + queryInfo.getQueryId().getId() + " is not Final Query Info. state is " + queryInfo.getState());
         return queryInfo;
     }
 

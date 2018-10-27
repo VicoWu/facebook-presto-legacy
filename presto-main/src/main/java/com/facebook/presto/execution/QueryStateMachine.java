@@ -806,6 +806,7 @@ public class QueryStateMachine
             log.debug(throwable, "Failure after query %s finished", queryId);
         }
 
+        log.info("query " + queryId + " transitioned to state " + queryState.get());
         return failed;
     }
 
