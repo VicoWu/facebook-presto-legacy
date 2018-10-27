@@ -210,13 +210,6 @@ public class StateMachine<T>
         checkState(!Thread.holdsLock(lock), "Can not fire state change event while holding the lock");
         requireNonNull(newState, "newState is null");
 
-        StringBuilder sb = new StringBuilder();
-        for (StackTraceElement ele : Thread.currentThread().getStackTrace()) {
-            sb.append(ele.toString() + "/n");
-        }
-
-        log.error("fireStateChanged in StateMachine call stack trace is " + sb.toString());
-
         safeExecute(() -> {
             checkState(!Thread.holdsLock(lock), "Can not notify while holding the lock");
             try {
