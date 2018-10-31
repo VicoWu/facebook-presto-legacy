@@ -29,6 +29,7 @@ public final class Completion
             "SHOW CATALOGS",
             "SHOW COLUMNS",
             "SHOW FUNCTIONS",
+            "SHOW PARTITIONS",
             "SHOW SCHEMAS",
             "SHOW SESSION",
             "SHOW TABLES",

@@ -57,12 +57,14 @@ import com.facebook.presto.sql.tree.ShowColumns;
 import com.facebook.presto.sql.tree.ShowCreate;
 import com.facebook.presto.sql.tree.ShowFunctions;
 import com.facebook.presto.sql.tree.ShowGrants;
+import com.facebook.presto.sql.tree.ShowPartitions;
 import com.facebook.presto.sql.tree.ShowSchemas;
 import com.facebook.presto.sql.tree.ShowSession;
 import com.facebook.presto.sql.tree.ShowTables;
 import com.facebook.presto.sql.tree.SortItem;
 import com.facebook.presto.sql.tree.Statement;
 import com.facebook.presto.sql.tree.StringLiteral;
+import com.facebook.presto.sql.tree.Table;
 import com.facebook.presto.sql.tree.TableElement;
 import com.facebook.presto.sql.tree.Values;
 import com.google.common.base.Joiner;
@@ -352,6 +354,27 @@ final class ShowQueriesRewrite
             }
 
             throw new PrestoException(INVALID_TABLE_PROPERTY, format("Failed to convert object of type %s to expression: %s", value.getClass().getName(), value));
+        }
+
+        @Override
+        protected Node visitShowPartitions(ShowPartitions showPartitions, Void context)
+        {
+            QualifiedObjectName table = createQualifiedObjectName(session, showPartitions, showPartitions.getTable());
+            if (!metadata.getTableHandle(session, table).isPresent()) {
+                throw new SemanticException(MISSING_TABLE, showPartitions, "Table '%s' does not exist", table);
+            }
+            QualifiedObjectName partitionsTable = new QualifiedObjectName(table.getCatalogName(), table.getSchemaName(), table.getObjectName() + "$partitions");
+            if (!metadata.getTableHandle(session, partitionsTable).isPresent()) {
+                throw new SemanticException(NOT_SUPPORTED, showPartitions, "Table does not have partition columns: %s", table);
+            }
+            return simpleQuery(
+                    selectList(new AllColumns()),
+                    new Table(createQualifiedName(partitionsTable)),
+                    showPartitions.getWhere(),
+                    Optional.empty(),
+                    Optional.empty(),
+                    orderBy(showPartitions.getOrderBy()),
+                    showPartitions.getLimit());
         }
 
         @Override

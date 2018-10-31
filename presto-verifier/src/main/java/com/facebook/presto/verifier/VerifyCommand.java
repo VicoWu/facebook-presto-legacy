@@ -31,6 +31,7 @@ import com.facebook.presto.sql.tree.RenameTable;
 import com.facebook.presto.sql.tree.ShowCatalogs;
 import com.facebook.presto.sql.tree.ShowColumns;
 import com.facebook.presto.sql.tree.ShowFunctions;
+import com.facebook.presto.sql.tree.ShowPartitions;
 import com.facebook.presto.sql.tree.ShowSchemas;
 import com.facebook.presto.sql.tree.ShowSession;
 import com.facebook.presto.sql.tree.ShowTables;
@@ -363,6 +364,9 @@ public class VerifyCommand
             return READ;
         }
         if (statement instanceof ShowFunctions) {
+            return READ;
+        }
+        if (statement instanceof ShowPartitions) {
             return READ;
         }
         if (statement instanceof ShowSchemas) {
