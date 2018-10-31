@@ -140,6 +140,12 @@
         </artifact>
     </artifactSet>
 
+    <artifactSet to="plugin/mssql">
+        <artifact id="${project.groupId}:presto-mssql:zip:${project.version}">
+            <unpack />
+        </artifact>
+    </artifactSet>
+
     <artifactSet to="plugin/raptor">
         <artifact id="${project.groupId}:presto-raptor:zip:${project.version}">
             <unpack />
