@@ -121,6 +121,7 @@
         <module>presto-memory-context</module>
         <module>presto-proxy</module>
         <module>presto-kudu</module>
+        <module>presto-snowflake</module>
     </modules>
 
     <dependencyManagement>
@@ -1067,6 +1068,52 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <repositories>
+        <repository>
+            <id>Hulu Maven2</id>
+            <url>http://nexus.prod.hulu.com/content/repositories/central/</url>
+        </repository>
+        <repository>
+            <id>Hulu Apache Releases</id>
+            <url>http://nexus.prod.hulu.com/content/repositories/apache-releases/</url>
+        </repository>
+        <repository>
+            <id>Hulu Apache Snapshots</id>
+            <url>http://nexus.prod.hulu.com/content/repositories/apache-snapshots/</url>
+        </repository>
+        <!--<repository>-->
+            <!--<id>Hulu Cloudera Releases</id>-->
+            <!--<url>http://nexus.prod.hulu.com/content/repositories/cloudera-release/</url>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>Hulu Cloudera Snapshots</id>-->
+            <!--<url>http://nexus.prod.hulu.com/content/repositories/cloudera-snapshots/</url>-->
+        <!--</repository>-->
+        <repository>
+            <id>Hulu Releases</id>
+            <url>http://nexus.prod.hulu.com/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>Hulu Snapshots</id>
+            <url>http://nexus.prod.hulu.com/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>Cloudera Artifactory</id>
+            <url>https://repository.cloudera.com/artifactory/repo</url>
+        </repository>
+        <repository>
+            <id>Apache Releases</id>
+            <url>https://repository.apache.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>Apache Snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>Maven2</id>
+            <url>http://repo.maven.apache.org/maven2/</url>
+        </repository>
+    </repositories>
 
     <build>
         <pluginManagement>

@@ -255,8 +255,8 @@ public class ServerMainModule
         httpClientBinder(binder).bindHttpClient("node-manager", ForNodeManager.class)
                 .withTracing()
                 .withConfigDefaults(config -> {
-                    config.setIdleTimeout(new Duration(30, SECONDS));
-                    config.setRequestTimeout(new Duration(10, SECONDS));
+                    config.setIdleTimeout(new Duration(300, SECONDS));
+                    config.setRequestTimeout(new Duration(300, SECONDS));
                 });
 
         // node scheduler
@@ -335,8 +335,8 @@ public class ServerMainModule
                 .withTracing()
                 .withFilter(GenerateTraceTokenRequestFilter.class)
                 .withConfigDefaults(config -> {
-                    config.setIdleTimeout(new Duration(30, SECONDS));
-                    config.setRequestTimeout(new Duration(10, SECONDS));
+                    config.setIdleTimeout(new Duration(300, SECONDS));
+                    config.setRequestTimeout(new Duration(300, SECONDS));
                     config.setMaxConnectionsPerServer(250);
                     config.setMaxContentLength(new DataSize(32, MEGABYTE));
                 });
