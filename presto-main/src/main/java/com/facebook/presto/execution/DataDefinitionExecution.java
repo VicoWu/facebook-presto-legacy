@@ -21,15 +21,18 @@ import com.facebook.presto.metadata.MetadataManager;
 import com.facebook.presto.security.AccessControl;
 import com.facebook.presto.server.BasicQueryInfo;
 import com.facebook.presto.spi.ErrorCode;
+import com.facebook.presto.spi.PrestoException;
 import com.facebook.presto.spi.QueryId;
 import com.facebook.presto.spi.resourceGroups.ResourceGroupId;
 import com.facebook.presto.sql.planner.Plan;
 import com.facebook.presto.sql.tree.Expression;
+import com.facebook.presto.sql.tree.SetSession;
 import com.facebook.presto.sql.tree.Statement;
 import com.facebook.presto.transaction.TransactionManager;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.airlift.log.Logger;
 import io.airlift.units.DataSize;
 import io.airlift.units.Duration;
 
@@ -53,6 +56,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 public class DataDefinitionExecution<T extends Statement>
         implements QueryExecution
 {
+    Logger log = Logger.get(DataDefinitionExecution.class);
     private final DataDefinitionTask<T> task;
     private final T statement;
     private final TransactionManager transactionManager;
@@ -269,6 +273,7 @@ public class DataDefinitionExecution<T extends Statement>
     public static class DataDefinitionExecutionFactory
             implements QueryExecutionFactory<DataDefinitionExecution<?>>
     {
+        Logger log = Logger.get(DataDefinitionExecutionFactory.class);
         private final LocationFactory locationFactory;
         private final TransactionManager transactionManager;
         private final Metadata metadata;
@@ -313,7 +318,18 @@ public class DataDefinitionExecution<T extends Statement>
             DataDefinitionTask<Statement> task = getTask(statement);
             checkArgument(task != null, "no task for statement: %s", statement.getClass().getSimpleName());
 
-            QueryStateMachine stateMachine = QueryStateMachine.begin(queryId, query, session, self, task.isTransactionControl(), transactionManager, accessControl, executor, metadata);
+            try {
+                QueryStateMachine stateMachine = QueryStateMachine.begin(queryId, query, session, self, task.isTransactionControl(), transactionManager, accessControl, executor, metadata);
+            } catch (PrestoException e){
+
+                log.error("Get Presto Exception when begin transaction, statement class is " + statement.getClass().getName(),e);
+                if(! (statement instanceof SetSession)) {
+                    throw e;
+                }
+                else {
+                    log.info("Get Presto Exception but the statement is SetSession, we ignore it;");
+                }
+            }
             stateMachine.setUpdateType(task.getName());
             return new DataDefinitionExecution<>(task, statement, transactionManager, metadata, accessControl, stateMachine, parameters);
         }

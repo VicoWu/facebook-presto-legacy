@@ -27,6 +27,7 @@ import com.facebook.presto.sql.tree.QualifiedName;
 import com.facebook.presto.sql.tree.SetSession;
 import com.facebook.presto.transaction.TransactionManager;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.airlift.log.Logger;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ import static java.lang.String.format;
 public class SetSessionTask
         implements DataDefinitionTask<SetSession>
 {
+    Logger log = Logger.get(SetSessionTask.class);
     @Override
     public String getName()
     {
@@ -64,7 +66,7 @@ public class SetSessionTask
                     .orElseThrow(() -> new SemanticException(INVALID_SESSION_PROPERTY, statement, "Session property %s does not exist", statement.getName()));
         }
         else {
-            ConnectorId connectorId = metadata.getCatalogHandle(stateMachine.getSession(), parts.get(0))
+            ConnectorId connectorId = metadata.getCatalogHandle(stateMacreateQueryExecutionchine.getSession(), parts.get(0))
                     .orElseThrow(() -> new SemanticException(MISSING_CATALOG, statement, "Catalog %s does not exist", parts.get(0)));
             accessControl.checkCanSetCatalogSessionProperty(session.getRequiredTransactionId(), session.getIdentity(), parts.get(0), parts.get(1));
             propertyMetadata = metadata.getSessionPropertyManager().getConnectorSessionPropertyMetadata(connectorId, parts.get(1))
@@ -80,6 +82,15 @@ public class SetSessionTask
         catch (SemanticException e) {
             throw new PrestoException(StandardErrorCode.INVALID_SESSION_PROPERTY,
                     format("Unable to set session property '%s' to '%s': %s", propertyName, statement.getValue(), e.getMessage()));
+        }
+        log.debug("Object value is " + objectValue + ", start to validate the objectValue");
+
+        try {
+            propertyMetadata.decode(objectValue);
+        }
+        catch (PrestoException e) {
+            log.error("validate object value " + objectValue + " get Presto exception;", e);
+            throw e;
         }
 
         String value = serializeSessionProperty(type, objectValue);
